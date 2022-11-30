@@ -1,3 +1,29 @@
+function tim_khoang_trong () {
+    rekabit.setServoPosition(ServoChannel.S1, 60)
+    for (let index = 0; index < 4; index++) {
+        rekabit.setRgbPixelColor(0, 0xff8000)
+        basic.pause(100)
+        rekabit.setRgbPixelColor(0, 0x000000)
+        basic.pause(100)
+    }
+    basic.pause(500)
+    zoombit.brake()
+    rekabit.setServoPosition(ServoChannel.S1, 120)
+    for (let index = 0; index < 4; index++) {
+        rekabit.setRgbPixelColor(0, 0xff8000)
+        basic.pause(100)
+        rekabit.setRgbPixelColor(0, 0x000000)
+    }
+    basic.pause(500)
+    rekabit.setServoPosition(ServoChannel.S1, 45)
+    for (let index = 0; index < 4; index++) {
+        rekabit.setRgbPixelColor(0, 0x00ff00)
+        basic.pause(100)
+        rekabit.setRgbPixelColor(0, 0x000000)
+        basic.pause(100)
+    }
+    basic.pause(100)
+}
 input.onButtonPressed(Button.A, function () {
     rekabit.setServoPosition(ServoChannel.S1, 45)
     for (let index = 0; index < 4; index++) {
@@ -15,10 +41,15 @@ function obstacle_avoidance () {
     distance = zoombit.readUltrasonic()
     if (distance < 10) {
         zoombit.move(MotorDirection.Backward, 128)
+        zoombit.turn(TurnDirection.Right, 128)
+        tim_khoang_trong()
     } else if (distance < 20) {
         zoombit.brake()
+        zoombit.turn(TurnDirection.Right, 128)
+        tim_khoang_trong()
     } else {
         zoombit.move(MotorDirection.Forward, 128)
+        rekabit.setServoPosition(ServoChannel.S1, 90)
     }
 }
 input.onButtonPressed(Button.AB, function () {
@@ -45,12 +76,24 @@ input.onLogoEvent(TouchButtonEvent.Pressed, function () {
     mode += 1
     zoombit.brake()
     if (mode == 1) {
-        basic.showIcon(IconNames.Heart)
+        basic.showLeds(`
+            . # . . .
+            # # . . .
+            . # . . .
+            . # . . .
+            . # . . .
+            `)
     } else if (mode == 2) {
-        basic.showIcon(IconNames.Square)
+        basic.showLeds(`
+            # # . . .
+            . . # . .
+            . # . . .
+            # . . . .
+            # # # . .
+            `)
     } else {
         basic.showLeds(`
-            . . . . .
+            . . # . .
             . # # # .
             # # # # #
             # # # # #
@@ -86,9 +129,11 @@ function line_following () {
 let position = 0
 let distance = 0
 let mode = 0
-music.playSoundEffect(music.builtinSoundEffect(soundExpression.giggle), SoundExpressionPlayMode.UntilDone)
+music.playSoundEffect(music.builtinSoundEffect(soundExpression.happy), SoundExpressionPlayMode.UntilDone)
 basic.showIcon(IconNames.Happy)
 zoombit.setHeadlight(HeadlightChannel.All, zoombit.digitalStatePicker(DigitalIoState.On))
+basic.pause(100)
+zoombit.setHeadlight(HeadlightChannel.All, zoombit.digitalStatePicker(DigitalIoState.Off))
 rekabit.setServoPosition(ServoChannel.S1, 90)
 mode = 0
 basic.forever(function () {
